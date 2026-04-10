@@ -279,8 +279,8 @@ function buildFallbackCar(carData) {
 
 // ── İSTANBUL DÜNYASI (geniş şehir) ──────────────────────
 function buildWorld() {
-  // Zemin
-  const gnd = new THREE.Mesh(new THREE.PlaneGeometry(2000,2000),
+  // Zemin - sadece İstanbul
+  const gnd = new THREE.Mesh(new THREE.PlaneGeometry(800,800),
     new THREE.MeshLambertMaterial({color:0x3a7d44}));
   gnd.rotation.x=-Math.PI/2; gnd.receiveShadow=true; scene.add(gnd);
 
@@ -289,24 +289,18 @@ function buildWorld() {
   const lineMat= new THREE.MeshLambertMaterial({color:0xffffff});
   const yLine  = new THREE.MeshLambertMaterial({color:0xf1c40f});
 
-  // Ana caddeler - çok daha geniş şehir
+  // İstanbul cadde ağı
   const roads = [
-    // Yatay ana caddeler
-    {cx:0,cz:0,w:1400,d:20,v:false},
-    {cx:0,cz:-120,w:1400,d:14,v:false},
-    {cx:0,cz:120,w:1400,d:14,v:false},
-    {cx:0,cz:-280,w:1400,d:14,v:false},
-    {cx:0,cz:280,w:1400,d:14,v:false},
-    {cx:0,cz:-480,w:1400,d:12,v:false},
-    {cx:0,cz:480,w:1400,d:12,v:false},
-    // Dikey ana caddeler
-    {cx:0,cz:0,w:20,d:1400,v:true},
-    {cx:-120,cz:0,w:14,d:1400,v:true},
-    {cx:120,cz:0,w:14,d:1400,v:true},
-    {cx:-280,cz:0,w:14,d:1400,v:true},
-    {cx:280,cz:0,w:14,d:1400,v:true},
-    {cx:-480,cz:0,w:12,d:1400,v:true},
-    {cx:480,cz:0,w:12,d:1400,v:true},
+    {cx:0,cz:0,w:700,d:18,v:false},
+    {cx:0,cz:-80,w:700,d:12,v:false},
+    {cx:0,cz:80,w:700,d:12,v:false},
+    {cx:0,cz:-200,w:700,d:10,v:false},
+    {cx:0,cz:200,w:700,d:10,v:false},
+    {cx:0,cz:0,w:18,d:700,v:true},
+    {cx:-80,cz:0,w:12,d:700,v:true},
+    {cx:80,cz:0,w:12,d:700,v:true},
+    {cx:-200,cz:0,w:10,d:700,v:true},
+    {cx:200,cz:0,w:10,d:700,v:true},
   ];
 
   roads.forEach(r => {
@@ -323,19 +317,18 @@ function buildWorld() {
     scene.add(sw2);
   });
 
-  // Yol çizgileri
-  for(let x=-680;x<680;x+=16){
+  // Yol çizgileri (azaltılmış)
+  for(let x=-340;x<340;x+=18){
     const l=new THREE.Mesh(new THREE.PlaneGeometry(0.25,8),lineMat);
     l.rotation.x=-Math.PI/2; l.position.set(x,0.03,0); scene.add(l);
   }
-  for(let z=-680;z<680;z+=16){
+  for(let z=-340;z<340;z+=18){
     const l=new THREE.Mesh(new THREE.PlaneGeometry(8,0.25),lineMat);
     l.rotation.x=-Math.PI/2; l.position.set(0,0.03,z); scene.add(l);
   }
-  // Orta sarı çizgiler
-  const yc1=new THREE.Mesh(new THREE.PlaneGeometry(1400,0.3),yLine);
+  const yc1=new THREE.Mesh(new THREE.PlaneGeometry(700,0.3),yLine);
   yc1.rotation.x=-Math.PI/2; yc1.position.set(0,0.04,0); scene.add(yc1);
-  const yc2=new THREE.Mesh(new THREE.PlaneGeometry(0.3,1400),yLine);
+  const yc2=new THREE.Mesh(new THREE.PlaneGeometry(0.3,700),yLine);
   yc2.rotation.x=-Math.PI/2; yc2.position.set(0,0.04,0); scene.add(yc2);
 
   buildBuildings();
@@ -347,145 +340,101 @@ function buildWorld() {
 }
 
 function buildBuildings() {
-  const winMat = new THREE.MeshPhongMaterial({color:0xffffcc,emissive:0xffff88,emissiveIntensity:0.4});
+  const winMat = new THREE.MeshPhongMaterial({color:0xffffcc,emissive:0xffff88,emissiveIntensity:0.5});
   const blocks = [
-    // Taksim bölgesi
-    {x:60,z:-60,w:20,h:35,d:20,c:0xd4a574},{x:85,z:-60,w:14,h:25,d:16,c:0xc9b99a},
-    {x:60,z:-90,w:16,h:45,d:14,c:0x8b9dc3},{x:85,z:-90,w:12,h:20,d:12,c:0xe8d5b7},
-    {x:-60,z:-60,w:20,h:30,d:20,c:0xb8a898},{x:-85,z:-60,w:14,h:40,d:16,c:0xd4a574},
-    {x:-60,z:-90,w:16,h:22,d:14,c:0xe8d5b7},{x:-85,z:-90,w:12,h:50,d:12,c:0x9b8ea0},
-    {x:60,z:60,w:20,h:28,d:20,c:0xd4a574},{x:85,z:60,w:14,h:42,d:16,c:0x8b9dc3},
-    {x:60,z:90,w:16,h:25,d:14,c:0xc9b99a},{x:85,z:90,w:12,h:33,d:12,c:0xe8d5b7},
-    {x:-60,z:60,w:20,h:38,d:20,c:0xb8a898},{x:-85,z:60,w:14,h:22,d:16,c:0xd4a574},
-    {x:-60,z:90,w:16,h:46,d:14,c:0x8b9dc3},{x:-85,z:90,w:12,h:30,d:12,c:0xe8d5b7},
-    // Kadıköy bölgesi
-    {x:160,z:160,w:22,h:28,d:18,c:0xd4a574},{x:190,z:160,w:16,h:35,d:14,c:0x8b9dc3},
-    {x:160,z:190,w:18,h:20,d:16,c:0xc9b99a},{x:190,z:190,w:14,h:42,d:12,c:0xe8d5b7},
-    // Beşiktaş bölgesi
-    {x:-160,z:-160,w:22,h:32,d:18,c:0xb8a898},{x:-190,z:-160,w:16,h:25,d:14,c:0xd4a574},
-    {x:-160,z:-190,w:18,h:48,d:16,c:0x8b9dc3},{x:-190,z:-190,w:14,h:22,d:12,c:0xe8d5b7},
-    // Üsküdar
-    {x:160,z:-160,w:22,h:30,d:18,c:0xd4a574},{x:190,z:-160,w:16,h:38,d:14,c:0xc9b99a},
-    {x:160,z:-190,w:18,h:24,d:16,c:0x8b9dc3},{x:190,z:-190,w:14,h:45,d:12,c:0xe8d5b7},
-    // Fatih
-    {x:-160,z:160,w:22,h:26,d:18,c:0xb8a898},{x:-190,z:160,w:16,h:40,d:14,c:0xd4a574},
-    {x:-160,z:190,w:18,h:35,d:16,c:0x8b9dc3},{x:-190,z:190,w:14,h:28,d:12,c:0xe8d5b7},
-    // Uzak binalar
-    {x:320,z:-60,w:24,h:55,d:18,c:0x9b8ea0},{x:-320,z:-60,w:24,h:48,d:18,c:0xd4a574},
-    {x:320,z:60,w:24,h:42,d:18,c:0x8b9dc3},{x:-320,z:60,w:24,h:60,d:18,c:0xe8d5b7},
-    {x:60,z:-320,w:18,h:38,d:24,c:0xc9b99a},{x:-60,z:-320,w:18,h:50,d:24,c:0xd4a574},
-    {x:60,z:320,w:18,h:30,d:24,c:0x8b9dc3},{x:-60,z:320,w:18,h:44,d:24,c:0xb8a898},
+    {x:50,z:-50,w:18,h:30,d:18,c:0xd4a574},{x:72,z:-50,w:12,h:22,d:14,c:0xc9b99a},
+    {x:50,z:-75,w:14,h:40,d:12,c:0x8b9dc3},{x:72,z:-75,w:10,h:18,d:10,c:0xe8d5b7},
+    {x:-50,z:-50,w:18,h:28,d:18,c:0xb8a898},{x:-72,z:-50,w:12,h:35,d:14,c:0xd4a574},
+    {x:-50,z:-75,w:14,h:20,d:12,c:0xe8d5b7},{x:-72,z:-75,w:10,h:45,d:10,c:0x9b8ea0},
+    {x:50,z:50,w:18,h:25,d:18,c:0xd4a574},{x:72,z:50,w:12,h:38,d:14,c:0x8b9dc3},
+    {x:50,z:75,w:14,h:22,d:12,c:0xc9b99a},{x:72,z:75,w:10,h:30,d:10,c:0xe8d5b7},
+    {x:-50,z:50,w:18,h:35,d:18,c:0xb8a898},{x:-72,z:50,w:12,h:20,d:14,c:0xd4a574},
+    {x:-50,z:75,w:14,h:42,d:12,c:0x8b9dc3},{x:-72,z:75,w:10,h:28,d:10,c:0xe8d5b7},
+    {x:130,z:-50,w:20,h:50,d:16,c:0x9b8ea0},{x:-130,z:-50,w:20,h:42,d:16,c:0xd4a574},
+    {x:130,z:50,w:20,h:38,d:16,c:0x8b9dc3},{x:-130,z:50,w:20,h:55,d:16,c:0xe8d5b7},
+    {x:50,z:-130,w:16,h:30,d:20,c:0xc9b99a},{x:-50,z:-130,w:16,h:44,d:20,c:0xd4a574},
+    {x:50,z:130,w:16,h:26,d:20,c:0x8b9dc3},{x:-50,z:130,w:16,h:36,d:20,c:0xb8a898},
   ];
-
   blocks.forEach(cfg => {
     const bld = new THREE.Mesh(new THREE.BoxGeometry(cfg.w,cfg.h,cfg.d),
       new THREE.MeshPhongMaterial({color:cfg.c}));
     bld.position.set(cfg.x,cfg.h/2,cfg.z);
-    bld.castShadow=true; bld.receiveShadow=true; scene.add(bld);
-    // Pencereler
-    for(let wy=2;wy<cfg.h-2;wy+=3.5){
-      for(let wx=-cfg.w/2+1.5;wx<cfg.w/2-1;wx+=2.5){
-        const win=new THREE.Mesh(new THREE.BoxGeometry(1.1,1.4,0.1),winMat);
-        win.position.set(cfg.x+wx,wy,cfg.z+cfg.d/2+0.05); scene.add(win);
-      }
+    bld.castShadow=true; scene.add(bld);
+    for(let wy=3;wy<cfg.h-3;wy+=5){
+      const win=new THREE.Mesh(new THREE.BoxGeometry(cfg.w*0.7,1.2,0.1),winMat);
+      win.position.set(cfg.x,wy,cfg.z+cfg.d/2+0.05); scene.add(win);
     }
-    // Çatı
-    const roof=new THREE.Mesh(new THREE.BoxGeometry(cfg.w+0.4,0.5,cfg.d+0.4),
-      new THREE.MeshPhongMaterial({color:0x8b4513}));
-    roof.position.set(cfg.x,cfg.h+0.25,cfg.z); scene.add(roof);
   });
 }
 
 function buildBridges() {
-  const concMat = new THREE.MeshPhongMaterial({color:0x888888});
-  const roadMat = new THREE.MeshLambertMaterial({color:0x1c1c1c});
-  const cableMat= new THREE.MeshPhongMaterial({color:0x555555});
-  const railMat = new THREE.MeshPhongMaterial({color:0x666666});
-
-  // Boğaz Köprüsü 1 (kuzey)
-  buildSuspensionBridge(0, 0, 280, concMat, roadMat, cableMat, railMat);
-  // Boğaz Köprüsü 2 (güney)
-  buildSuspensionBridge(0, 0, -280, concMat, roadMat, cableMat, railMat);
-  // Yatay köprü (doğu-batı)
-  buildSuspensionBridgeH(280, 0, 0, concMat, roadMat, cableMat, railMat);
-  buildSuspensionBridgeH(-280, 0, 0, concMat, roadMat, cableMat, railMat);
+  const concMat=new THREE.MeshPhongMaterial({color:0x888888});
+  const roadMat=new THREE.MeshLambertMaterial({color:0x1c1c1c});
+  const cableMat=new THREE.MeshPhongMaterial({color:0x555555});
+  buildSuspensionBridge(0,0,200,concMat,roadMat,cableMat);
+  buildSuspensionBridge(0,0,-200,concMat,roadMat,cableMat);
 }
 
-function buildSuspensionBridge(cx, cy, cz, concMat, roadMat, cableMat, railMat) {
-  const bridgeLen = 120, bridgeW = 20, towerH = 40;
-  // Köprü yolu
-  const deck = new THREE.Mesh(new THREE.BoxGeometry(bridgeLen,1.5,bridgeW), concMat);
+function buildSuspensionBridge(cx,cy,cz,concMat,roadMat,cableMat) {
+  const bLen=100,bW=16,tH=35;
+  const deck=new THREE.Mesh(new THREE.BoxGeometry(bLen,1.5,bW),concMat);
   deck.position.set(cx,8,cz); scene.add(deck);
-  const road = new THREE.Mesh(new THREE.PlaneGeometry(bridgeLen,bridgeW-2), roadMat);
+  const road=new THREE.Mesh(new THREE.PlaneGeometry(bLen,bW-2),roadMat);
   road.rotation.x=-Math.PI/2; road.position.set(cx,9.1,cz); scene.add(road);
-  // Kuleler
-  [-bridgeLen/2+8, bridgeLen/2-8].forEach(ox => {
-    const tower = new THREE.Mesh(new THREE.BoxGeometry(3,towerH,3), concMat);
-    tower.position.set(cx+ox, towerH/2, cz); tower.castShadow=true; scene.add(tower);
-    // Kablo
-    const cable = new THREE.Mesh(new THREE.CylinderGeometry(0.2,0.2,bridgeLen*0.6,8), cableMat);
-    cable.rotation.z = Math.PI/2; cable.position.set(cx, towerH*0.7, cz); scene.add(cable);
+  [-bLen/2+8,bLen/2-8].forEach(ox=>{
+    const tower=new THREE.Mesh(new THREE.BoxGeometry(3,tH,3),concMat);
+    tower.position.set(cx+ox,tH/2,cz); tower.castShadow=true; scene.add(tower);
   });
-  // Korkuluklar
-  [-bridgeW/2+1, bridgeW/2-1].forEach(oz => {
-    const rail = new THREE.Mesh(new THREE.BoxGeometry(bridgeLen,1,0.3), railMat);
-    rail.position.set(cx,9.8,cz+oz); scene.add(rail);
-  });
-}
-
-function buildSuspensionBridgeH(cx, cy, cz, concMat, roadMat, cableMat, railMat) {
-  const bridgeLen = 120, bridgeW = 20, towerH = 40;
-  const deck = new THREE.Mesh(new THREE.BoxGeometry(bridgeW,1.5,bridgeLen), concMat);
-  deck.position.set(cx,8,cz); scene.add(deck);
-  const road = new THREE.Mesh(new THREE.PlaneGeometry(bridgeW-2,bridgeLen), roadMat);
-  road.rotation.x=-Math.PI/2; road.position.set(cx,9.1,cz); scene.add(road);
-  [-(bridgeLen/2-8), bridgeLen/2-8].forEach(oz => {
-    const tower = new THREE.Mesh(new THREE.BoxGeometry(3,towerH,3), concMat);
-    tower.position.set(cx, towerH/2, cz+oz); tower.castShadow=true; scene.add(tower);
-  });
-  [-bridgeW/2+1, bridgeW/2-1].forEach(ox => {
-    const rail = new THREE.Mesh(new THREE.BoxGeometry(0.3,1,bridgeLen), concMat);
-    rail.position.set(cx+ox,9.8,cz); scene.add(rail);
-  });
+  const cable=new THREE.Mesh(new THREE.CylinderGeometry(0.15,0.15,bLen*0.55,6),cableMat);
+  cable.rotation.z=Math.PI/2; cable.position.set(cx,tH*0.75,cz); scene.add(cable);
 }
 
 function buildLandmarks() {
-  const cMat = new THREE.MeshPhongMaterial({color:0xd4c5a9});
-  // Cami (Ayasofya tarzı)
-  const cBase = new THREE.Mesh(new THREE.BoxGeometry(24,6,24), cMat);
-  cBase.position.set(0,3,-350); scene.add(cBase);
-  const dome = new THREE.Mesh(new THREE.SphereGeometry(9,16,16,0,Math.PI*2,0,Math.PI/2), cMat);
-  dome.position.set(0,6,-350); scene.add(dome);
-  [[-10,-10],[-10,10],[10,-10],[10,10]].forEach(([mx,mz]) => {
-    const min=new THREE.Mesh(new THREE.CylinderGeometry(0.6,0.8,22,8),cMat);
-    min.position.set(mx,11,-350+mz); scene.add(min);
-    const top=new THREE.Mesh(new THREE.ConeGeometry(0.9,3.5,8),
+  const cMat=new THREE.MeshPhongMaterial({color:0xd4c5a9});
+  const redMat=new THREE.MeshPhongMaterial({color:0x8b4513});
+  // Ayasofya
+  const ayBase=new THREE.Mesh(new THREE.BoxGeometry(22,5,22),cMat);
+  ayBase.position.set(0,2.5,-250); scene.add(ayBase);
+  const ayDome=new THREE.Mesh(new THREE.SphereGeometry(8,12,12,0,Math.PI*2,0,Math.PI/2),cMat);
+  ayDome.position.set(0,5,-250); scene.add(ayDome);
+  [[-9,-9],[-9,9],[9,-9],[9,9]].forEach(([mx,mz])=>{
+    const min=new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.7,20,8),cMat);
+    min.position.set(mx,10,-250+mz); scene.add(min);
+    const top=new THREE.Mesh(new THREE.ConeGeometry(0.8,3,8),
       new THREE.MeshPhongMaterial({color:0x888888}));
-    top.position.set(mx,23,-350+mz); scene.add(top);
+    top.position.set(mx,21,-250+mz); scene.add(top);
   });
   // Galata Kulesi
-  const galBase=new THREE.Mesh(new THREE.CylinderGeometry(5,5.5,25,12),cMat);
-  galBase.position.set(-350,12.5,0); scene.add(galBase);
-  const galTop=new THREE.Mesh(new THREE.ConeGeometry(5.5,10,12),
-    new THREE.MeshPhongMaterial({color:0x8b4513}));
-  galTop.position.set(-350,30,0); scene.add(galTop);
+  const galBase=new THREE.Mesh(new THREE.CylinderGeometry(4.5,5,22,12),cMat);
+  galBase.position.set(-250,11,0); scene.add(galBase);
+  const galTop=new THREE.Mesh(new THREE.ConeGeometry(5,9,12),redMat);
+  galTop.position.set(-250,27,0); scene.add(galTop);
   // Kız Kulesi
-  const kkBase=new THREE.Mesh(new THREE.CylinderGeometry(4,4.5,18,10),cMat);
-  kkBase.position.set(350,9,-350); scene.add(kkBase);
-  const kkTop=new THREE.Mesh(new THREE.ConeGeometry(4.5,8,10),
-    new THREE.MeshPhongMaterial({color:0x8b4513}));
-  kkTop.position.set(350,22,-350); scene.add(kkTop);
+  const kkBase=new THREE.Mesh(new THREE.CylinderGeometry(3.5,4,16,10),cMat);
+  kkBase.position.set(250,8,-250); scene.add(kkBase);
+  const kkTop=new THREE.Mesh(new THREE.ConeGeometry(4,7,10),redMat);
+  kkTop.position.set(250,20,-250); scene.add(kkTop);
+  // Sultanahmet (Mavi Cami)
+  const blueMat=new THREE.MeshPhongMaterial({color:0x6699cc});
+  const smBase=new THREE.Mesh(new THREE.BoxGeometry(20,4,20),cMat);
+  smBase.position.set(60,2,-250); scene.add(smBase);
+  const smDome=new THREE.Mesh(new THREE.SphereGeometry(7,12,12,0,Math.PI*2,0,Math.PI/2),blueMat);
+  smDome.position.set(60,4,-250); scene.add(smDome);
+  [[-8,-8],[-8,8],[8,-8],[8,8],[-8,0],[8,0]].forEach(([mx,mz])=>{
+    const min=new THREE.Mesh(new THREE.CylinderGeometry(0.4,0.6,18,8),cMat);
+    min.position.set(60+mx,9,-250+mz); scene.add(min);
+  });
 }
 
 function buildTrees() {
   const trunkMat=new THREE.MeshLambertMaterial({color:0x8B4513});
   const leafMat=new THREE.MeshLambertMaterial({color:0x228B22});
-  for(let i=0;i<200;i++){
-    const x=(Math.random()-0.5)*900, z=(Math.random()-0.5)*900;
-    if(Math.abs(x)<16||Math.abs(z)<16) continue;
+  for(let i=0;i<60;i++){
+    const x=(Math.random()-0.5)*500, z=(Math.random()-0.5)*500;
+    if(Math.abs(x)<14||Math.abs(z)<14) continue;
     const trunk=new THREE.Mesh(new THREE.CylinderGeometry(0.2,0.3,2.5,6),trunkMat);
     trunk.position.set(x,1.25,z); scene.add(trunk);
-    const leaves=new THREE.Mesh(new THREE.SphereGeometry(1.8+Math.random(),8,8),leafMat);
+    const leaves=new THREE.Mesh(new THREE.SphereGeometry(1.8,6,6),leafMat);
     leaves.position.set(x,4.2,z); scene.add(leaves);
   }
 }
@@ -493,48 +442,47 @@ function buildTrees() {
 function buildStreetLights() {
   const poleMat=new THREE.MeshPhongMaterial({color:0x555555});
   const lampMat=new THREE.MeshPhongMaterial({color:0xffffaa,emissive:0xffff44,emissiveIntensity:1});
-  for(let i=-600;i<600;i+=30){
-    [12,-12].forEach(off=>{
+  for(let i=-300;i<300;i+=40){
+    [11,-11].forEach(off=>{
       const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.14,7,6),poleMat);
       pole.position.set(i,3.5,off); scene.add(pole);
-      const lamp=new THREE.Mesh(new THREE.SphereGeometry(0.3,8,8),lampMat);
+      const lamp=new THREE.Mesh(new THREE.SphereGeometry(0.3,6,6),lampMat);
       lamp.position.set(i,7.3,off); scene.add(lamp);
     });
   }
 }
 
 function buildSky() {
-  const sun2=new THREE.Mesh(new THREE.SphereGeometry(10,16,16),
+  const sun2=new THREE.Mesh(new THREE.SphereGeometry(10,12,12),
     new THREE.MeshBasicMaterial({color:0xfffacd}));
   sun2.position.set(100,180,-300); scene.add(sun2);
-  const cMat=new THREE.MeshLambertMaterial({color:0xffffff,transparent:true,opacity:0.88});
-  for(let i=0;i<22;i++){
+  const cMat=new THREE.MeshLambertMaterial({color:0xffffff,transparent:true,opacity:0.85});
+  for(let i=0;i<10;i++){
     const cloud=new THREE.Group();
-    for(let j=0;j<5;j++){
-      const p=new THREE.Mesh(new THREE.SphereGeometry(4+Math.random()*3,8,8),cMat);
-      p.position.set(j*6-12,Math.random()*3,0); cloud.add(p);
+    for(let j=0;j<4;j++){
+      const p=new THREE.Mesh(new THREE.SphereGeometry(4+Math.random()*2,6,6),cMat);
+      p.position.set(j*6-9,Math.random()*2,0); cloud.add(p);
     }
-    cloud.position.set((Math.random()-0.5)*700,80+Math.random()*60,(Math.random()-0.5)*700);
+    cloud.position.set((Math.random()-0.5)*600,80+Math.random()*40,(Math.random()-0.5)*600);
     scene.add(cloud);
   }
 }
 
 // ── NPC TAKSİ SİSTEMİ ────────────────────────────────────
 const NPC_LOCS = [
-  {name:'Taksim Meydanı',   x:0,   z:0},
-  {name:'Galata Kulesi',    x:-350,z:0},
-  {name:'Kız Kulesi',       x:350, z:-350},
-  {name:'Ayasofya',         x:0,   z:-350},
-  {name:'Kadıköy',          x:200, z:200},
-  {name:'Beşiktaş',         x:-200,z:-200},
-  {name:'Üsküdar',          x:200, z:-200},
-  {name:'Fatih',            x:-200,z:200},
-  {name:'Şişli',            x:60,  z:-120},
-  {name:'Beyoğlu',          x:-60, z:120},
-  {name:'Bağcılar',         x:-350,z:200},
-  {name:'Maltepe',          x:350, z:200},
-  {name:'Sarıyer',          x:0,   z:-480},
-  {name:'Pendik',           x:480, z:0},
+  {name:'Taksim Meydanı',  x:0,   z:0},
+  {name:'Galata Kulesi',   x:-250,z:0},
+  {name:'Kız Kulesi',      x:250, z:-250},
+  {name:'Ayasofya',        x:0,   z:-250},
+  {name:'Sultanahmet',     x:60,  z:-250},
+  {name:'Kadıköy',         x:150, z:150},
+  {name:'Beşiktaş',        x:-150,z:-150},
+  {name:'Üsküdar',         x:150, z:-150},
+  {name:'Fatih',           x:-150,z:150},
+  {name:'Şişli',           x:50,  z:-80},
+  {name:'Beyoğlu',         x:-50, z:80},
+  {name:'Boğaz Köprüsü',   x:0,   z:200},
+  {name:'FSM Köprüsü',     x:0,   z:-200},
 ];
 
 const npcs = [];
