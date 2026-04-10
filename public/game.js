@@ -92,7 +92,12 @@ const carCache = {};
 
 function loadCarGLB(carData) {
   return new Promise((resolve) => {
-    if (carCache[carData.id]) { resolve(carCache[carData.id].clone()); return; }
+    if (carCache[carData.id]) {
+      const clone = carCache[carData.id].clone();
+      clone.userData.wheels = findWheels(clone);
+      resolve(clone);
+      return;
+    }
     loader.load(carData.glb, (gltf) => {
       const model = gltf.scene;
       model.scale.setScalar(carData.scale);
@@ -100,20 +105,23 @@ function loadCarGLB(carData) {
       model.traverse(n => {
         if (n.isMesh) { n.castShadow=true; n.receiveShadow=true; }
       });
-      // Kenney araçlarının tekerleklerini bul
-      model.userData.wheels = [];
-      model.traverse(n => {
-        if (n.name && (n.name.toLowerCase().includes('wheel') || n.name.toLowerCase().includes('tire'))) {
-          model.userData.wheels.push(n);
-        }
-      });
       carCache[carData.id] = model;
-      resolve(model.clone());
+      const clone = model.clone();
+      clone.userData.wheels = findWheels(clone);
+      resolve(clone);
     }, undefined, () => {
-      // Fallback: basit araba
+      console.warn('GLB yüklenemedi, fallback:', carData.glb);
       resolve(buildFallbackCar(carData));
     });
   });
+}
+
+function findWheels(model) {
+  const wheels = [];
+  model.traverse(n => {
+    if (n.name && /wheel|tire|tyre/i.test(n.name)) wheels.push(n);
+  });
+  return wheels;
 }
 
 function buildFallbackCar(carData) {
@@ -547,15 +555,16 @@ function updatePhysics(delta){
   playerCar.position.z=Math.max(-340,Math.min(340,playerCar.position.z));
 
   // Tekerlek dönüşü (GLB wheels)
-  wheelRot+=speed*3.5;
-  if(playerCar.userData&&playerCar.userData.wheels){
-    playerCar.userData.wheels.forEach(w=>{ w.rotation.x=wheelRot; });
+  wheelRot += speed * 3.5;
+  if (playerCar.userData && playerCar.userData.wheels && playerCar.userData.wheels.length > 0) {
+    playerCar.userData.wheels.forEach(w => { w.rotation.x = wheelRot; });
   }
 
-  // Hız göstergesi - km/h
-  const kmh=Math.abs(Math.round(speed*1100));
-  document.getElementById('speed-value').textContent=kmh;
-  drawSpeedo(kmh,Math.round(currentCarData.maxSpeed*1100));
+  // Hız göstergesi - km/h (maxSpeed 0.28 = ~112 km/h)
+  const kmh = Math.abs(Math.round(speed * 400));
+  const maxKmh = Math.round(currentCarData.maxSpeed * 400);
+  document.getElementById('speed-value').textContent = kmh;
+  drawSpeedo(kmh, maxKmh);
 
   checkNearNPC();
   checkDropoff();
@@ -565,54 +574,72 @@ function updatePhysics(delta){
 const speedoCanvas=document.getElementById('speedo-canvas');
 const sCtx=speedoCanvas.getContext('2d');
 
-function drawSpeedo(kmh,maxKmh){
-  const W=140,H=140,cx=70,cy=78,R=58;
+function drawSpeedo(kmh, maxKmh){
+  const W=140, H=140, cx=70, cy=70, R=60;
   sCtx.clearRect(0,0,W,H);
 
   // Arka daire
   sCtx.beginPath(); sCtx.arc(cx,cy,R,0,Math.PI*2);
-  sCtx.fillStyle='rgba(0,0,0,0.82)'; sCtx.fill();
-  sCtx.strokeStyle='rgba(255,255,255,0.12)'; sCtx.lineWidth=2; sCtx.stroke();
+  sCtx.fillStyle='rgba(0,0,0,0.85)'; sCtx.fill();
+  sCtx.strokeStyle='rgba(255,255,255,0.15)'; sCtx.lineWidth=2; sCtx.stroke();
 
-  // Yay arka
-  const startA=Math.PI*0.75, endA=Math.PI*2.25;
-  sCtx.beginPath(); sCtx.arc(cx,cy,R-10,startA,endA);
-  sCtx.strokeStyle='#2a2a2a'; sCtx.lineWidth=10; sCtx.stroke();
+  // Yay arka (sol alttan sağ alta, 225° → 315° yani -225° → -315° açısı)
+  const startA = (225 * Math.PI) / 180;  // sol alt
+  const endA   = (315 * Math.PI) / 180;  // sağ alt (tam tur + biraz)
+  // Three.js arc: startAngle=225deg (sol alt), endAngle=315deg (sağ alt) counterclockwise=false
+  // Ama canvas arc saat yönünde gider, 225°=sol alt, 315°=sağ alt
+  // Gerçek speedo: sol alt başlar, sağ alta biter, üstten geçer
+  const s = (225 * Math.PI) / 180;
+  const e = (315 * Math.PI) / 180;
 
-  // Renkli yay
-  const ratio=Math.min(kmh/maxKmh,1);
-  const curA=startA+(endA-startA)*ratio;
-  const grad=sCtx.createLinearGradient(0,0,W,0);
-  grad.addColorStop(0,'#00e676'); grad.addColorStop(0.55,'#ffeb3b'); grad.addColorStop(1,'#f44336');
-  sCtx.beginPath(); sCtx.arc(cx,cy,R-10,startA,curA);
-  sCtx.strokeStyle=grad; sCtx.lineWidth=10; sCtx.stroke();
+  sCtx.beginPath(); sCtx.arc(cx, cy, R-8, s, e);
+  sCtx.strokeStyle='#222'; sCtx.lineWidth=10; sCtx.stroke();
 
-  // Çizgiler + sayılar
-  sCtx.font='bold 8px Arial'; sCtx.fillStyle='#aaa'; sCtx.textAlign='center';
-  for(let i=0;i<=10;i++){
-    const a=startA+(endA-startA)*(i/10);
-    const x1=cx+Math.cos(a)*(R-18), y1=cy+Math.sin(a)*(R-18);
-    const x2=cx+Math.cos(a)*(R-26), y2=cy+Math.sin(a)*(R-26);
-    sCtx.beginPath(); sCtx.moveTo(x1,y1); sCtx.lineTo(x2,y2);
-    sCtx.strokeStyle=i%2===0?'#888':'#444'; sCtx.lineWidth=i%2===0?2:1; sCtx.stroke();
-    if(i%2===0){
-      const tx=cx+Math.cos(a)*(R-34), ty=cy+Math.sin(a)*(R-34)+3;
-      sCtx.fillText(Math.round(maxKmh*i/10),tx,ty);
+  // Renkli yay (0 → kmh/maxKmh oranında)
+  const ratio = Math.min(kmh / maxKmh, 1);
+  const sweep = ((270 * ratio) * Math.PI) / 180; // 270° toplam açı
+  const curA = s + sweep;
+
+  const grad = sCtx.createLinearGradient(0, H, W, 0);
+  grad.addColorStop(0,   '#00e676');
+  grad.addColorStop(0.5, '#ffeb3b');
+  grad.addColorStop(1,   '#f44336');
+  sCtx.beginPath(); sCtx.arc(cx, cy, R-8, s, curA);
+  sCtx.strokeStyle = grad; sCtx.lineWidth = 10; sCtx.stroke();
+
+  // Tik çizgileri + sayılar
+  sCtx.textAlign = 'center'; sCtx.textBaseline = 'middle';
+  for(let i = 0; i <= 10; i++){
+    const a = s + (270 * Math.PI / 180) * (i / 10);
+    const cos = Math.cos(a), sin = Math.sin(a);
+    const isMajor = i % 2 === 0;
+    const r1 = R - 14, r2 = R - (isMajor ? 22 : 18);
+    sCtx.beginPath();
+    sCtx.moveTo(cx + cos*r1, cy + sin*r1);
+    sCtx.lineTo(cx + cos*r2, cy + sin*r2);
+    sCtx.strokeStyle = isMajor ? '#aaa' : '#555';
+    sCtx.lineWidth = isMajor ? 2 : 1;
+    sCtx.stroke();
+    if(isMajor){
+      const val = Math.round(maxKmh * i / 10);
+      sCtx.font = 'bold 7px Arial';
+      sCtx.fillStyle = '#ccc';
+      sCtx.fillText(val, cx + cos*(R-30), cy + sin*(R-30));
     }
   }
 
   // İbre
-  const needleA=startA+(endA-startA)*ratio;
+  const needleA = s + (270 * Math.PI / 180) * ratio;
   sCtx.beginPath();
-  sCtx.moveTo(cx-Math.cos(needleA)*8, cy-Math.sin(needleA)*8);
-  sCtx.lineTo(cx+Math.cos(needleA)*(R-16), cy+Math.sin(needleA)*(R-16));
-  sCtx.strokeStyle='#f44336'; sCtx.lineWidth=2.5; sCtx.lineCap='round'; sCtx.stroke();
+  sCtx.moveTo(cx - Math.cos(needleA)*10, cy - Math.sin(needleA)*10);
+  sCtx.lineTo(cx + Math.cos(needleA)*(R-18), cy + Math.sin(needleA)*(R-18));
+  sCtx.strokeStyle = '#ff1744'; sCtx.lineWidth = 2.5; sCtx.lineCap = 'round'; sCtx.stroke();
 
-  // Merkez
-  sCtx.beginPath(); sCtx.arc(cx,cy,5,0,Math.PI*2);
-  sCtx.fillStyle='#f44336'; sCtx.fill();
-  sCtx.beginPath(); sCtx.arc(cx,cy,3,0,Math.PI*2);
-  sCtx.fillStyle='#fff'; sCtx.fill();
+  // Merkez nokta
+  sCtx.beginPath(); sCtx.arc(cx, cy, 5, 0, Math.PI*2);
+  sCtx.fillStyle = '#ff1744'; sCtx.fill();
+  sCtx.beginPath(); sCtx.arc(cx, cy, 2.5, 0, Math.PI*2);
+  sCtx.fillStyle = '#fff'; sCtx.fill();
 }
 
 // ─── KAMERA ───────────────────────────────────────────────────────────────────
