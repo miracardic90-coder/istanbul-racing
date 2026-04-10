@@ -27,6 +27,13 @@ io.on('connection', (socket) => {
   socket.emit('init', { id: socket.id, players });
   socket.broadcast.emit('playerJoined', players[socket.id]);
 
+  socket.on('setName', (name) => {
+    if (players[socket.id]) {
+      players[socket.id].name = name.substring(0, 16);
+      socket.broadcast.emit('playerRenamed', { id: socket.id, name: players[socket.id].name });
+    }
+  });
+
   socket.on('update', (data) => {
     if (!players[socket.id]) return;
     Object.assign(players[socket.id], data);

@@ -2,21 +2,32 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>İstanbul GTA - Taksi</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div id="loading">
+<!-- KULLANICI ADI -->
+<div id="name-screen">
+  <div class="name-box">
+    <h1>🏙️ İSTANBUL GTA</h1>
+    <p>Taksi sür, para kazan</p>
+    <input id="name-input" type="text" placeholder="Kullanıcı adın..." maxlength="16" autocomplete="off">
+    <button id="name-btn">OYUNA GİR →</button>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div id="loading" class="hidden">
   <div class="loading-content">
     <h1>🏙️ İSTANBUL GTA</h1>
-    <p>Taksi sür, para kazan, şehri fethet</p>
     <div class="loader-bar"><div id="loader-fill"></div></div>
     <div id="loader-text">Şehir yükleniyor...</div>
   </div>
 </div>
 
+<!-- GARAGE -->
 <div id="garage" class="hidden">
   <div class="garage-inner">
     <h2>🚗 ARAÇ SEÇ</h2>
@@ -26,10 +37,11 @@
   </div>
 </div>
 
-<div id="ui">
+<!-- HUD -->
+<div id="ui" class="hidden">
   <div id="hud-top">
     <div id="money-display">💰 <span id="money-val">0</span> ₺</div>
-    <div id="car-display">🚗 <span id="car-name-val">-</span></div>
+    <div id="player-name-tag">👤 <span id="player-name-display">-</span></div>
     <button id="garage-btn">🏎️ Garaj</button>
   </div>
 
@@ -56,23 +68,31 @@
 
   <div id="earn-popup"></div>
 
+  <!-- YÖN OKU (canvas üstünde) -->
+  <div id="direction-arrow" class="hidden">
+    <div id="arrow-icon">▲</div>
+    <div id="arrow-dist"></div>
+  </div>
+
   <div id="controls-hint">
     <span>W/S Gaz/Fren</span>
     <span>A/D Direksiyon</span>
-    <span>SPACE El freni</span>
-    <span>E Yolcu al/bırak</span>
+    <span>SPACE Fren</span>
+    <span>E Yolcu al</span>
   </div>
 
-  <!-- MOBİL KONTROLLER -->
+  <!-- MOBİL KONTROLLER: Sol=Direksiyon, Sağ=Gaz+Fren -->
   <div id="mobile-controls">
-    <div id="joystick-zone">
-      <div id="joystick-base">
-        <div id="joystick-knob"></div>
-      </div>
+    <!-- SOL: Direksiyon -->
+    <div id="steering-zone">
+      <div id="steering-left" class="steer-btn">◀</div>
+      <div id="steering-right" class="steer-btn">▶</div>
     </div>
-    <div id="mobile-btns">
-      <button id="btn-brake" class="mob-btn">🛑<br><span>FREN</span></button>
-      <button id="btn-pickup" class="mob-btn yellow">🧍<br><span>AL/BIRAK</span></button>
+    <!-- SAĞ: Gaz + Fren + Yolcu -->
+    <div id="pedal-zone">
+      <button id="btn-pickup" class="mob-btn yellow">🧍</button>
+      <button id="btn-gas" class="mob-btn green">⬆<br><span>GAZ</span></button>
+      <button id="btn-brake" class="mob-btn red">⬇<br><span>FREN</span></button>
     </div>
   </div>
 </div>
