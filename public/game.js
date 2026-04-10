@@ -460,41 +460,68 @@ function buildSky() {
 }
 
 // ── NPC SİSTEMİ ──────────────────────────────────
-const LOCS = [
-  {name:'Taksim',      x:0,   z:0},
-  {name:'Galata',      x:-220,z:0},
-  {name:'Kız Kulesi',  x:220, z:-220},
-  {name:'Ayasofya',    x:0,   z:-220},
-  {name:'Sultanahmet', x:60,  z:-220},
-  {name:'Kadıköy',     x:150, z:150},
-  {name:'Beşiktaş',    x:-150,z:-150},
-  {name:'Üsküdar',     x:150, z:-150},
-  {name:'Fatih',       x:-150,z:150},
-  {name:'Şişli',       x:50,  z:-80},
-  {name:'Beyoğlu',     x:-50, z:80},
-  {name:'Boğaz Köprüsü',x:0,  z:200},
+// NPC spawn noktaları - SADECE yol üzerinde, binalardan uzak
+const ROAD_SPAWN_POINTS = [
+  {name:'Taksim',        x:0,   z:0},
+  {name:'Galata',        x:-220,z:0},
+  {name:'Ayasofya',      x:0,   z:-220},
+  {name:'Sultanahmet',   x:60,  z:-220},
+  {name:'Kadıköy',       x:150, z:150},
+  {name:'Beşiktaş',      x:-150,z:-150},
+  {name:'Üsküdar',       x:150, z:-150},
+  {name:'Fatih',         x:-150,z:150},
+  {name:'Şişli',         x:0,   z:-80},
+  {name:'Beyoğlu',       x:-80, z:0},
+  {name:'Boğaz Köprüsü', x:0,   z:200},
+  {name:'Kavşak D',      x:80,  z:0},
+  {name:'Kavşak K',      x:0,   z:80},
+  {name:'Kavşak G',      x:-80, z:-80},
+  {name:'Kavşak H',      x:80,  z:-80},
+  {name:'Kavşak I',      x:-80, z:80},
+  {name:'Kavşak J',      x:200, z:0},
+  {name:'Kavşak L',      x:-200,z:0},
+  {name:'Kavşak M',      x:0,   z:-200},
+  {name:'Kavşak N',      x:0,   z:200},
 ];
 
+const LOCS = ROAD_SPAWN_POINTS.filter(p => !p.name.startsWith('Kavşak'));
+
 function spawnNPCs() {
-  for (let i = 0; i < 8; i++) {
-    const loc = LOCS[Math.floor(Math.random()*LOCS.length)];
-    const g = new THREE.Group();
-    const cols = [0xe74c3c,0x3498db,0x2ecc71,0x9b59b6,0xe67e22,0x1abc9c];
-    const bMat = new THREE.MeshPhongMaterial({ color: cols[Math.floor(Math.random()*cols.length)] });
-    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.35,1.2,8), bMat);
-    body.position.y = 0.9; g.add(body);
-    const head = new THREE.Mesh(new THREE.SphereGeometry(0.28,8,8),
-      new THREE.MeshPhongMaterial({ color: 0xf5cba7 }));
-    head.position.y = 1.8; g.add(head);
-    const excMat = new THREE.MeshPhongMaterial({ color: 0xf1c40f, emissive: 0xf1c40f, emissiveIntensity: 0.9 });
-    const excl = new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,0.5,6), excMat);
-    excl.position.y = 2.6; g.add(excl);
-    const dot = new THREE.Mesh(new THREE.SphereGeometry(0.1,6,6), excMat);
-    dot.position.y = 2.2; g.add(dot);
-    g.position.set(loc.x+(Math.random()-0.5)*8, 0, loc.z+(Math.random()-0.5)*8);
-    g.userData = { waiting: true, inCar: false, excl };
-    scene.add(g); npcs.push(g);
+  // 20 NPC - tam yol üzerinde doğar, offset yok
+  for (let i = 0; i < 20; i++) {
+    const loc = ROAD_SPAWN_POINTS[i % ROAD_SPAWN_POINTS.length];
+    spawnOneNPC(loc.x, loc.z);
   }
+}
+
+function spawnOneNPC(x, z) {
+  const g = new THREE.Group();
+  const cols = [0xe74c3c,0x3498db,0x2ecc71,0x9b59b6,0xe67e22,0x1abc9c];
+  const bMat = new THREE.MeshPhongMaterial({ color: cols[Math.floor(Math.random()*cols.length)] });
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.35,1.2,8), bMat);
+  body.position.y = 0.9; g.add(body);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.28,8,8),
+    new THREE.MeshPhongMaterial({ color: 0xf5cba7 }));
+  head.position.y = 1.8; g.add(head);
+  // Kollar
+  [-0.45, 0.45].forEach(ox => {
+    const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.1,0.8,6), bMat);
+    arm.position.set(ox, 1.1, 0); arm.rotation.z = ox > 0 ? 0.4 : -0.4; g.add(arm);
+  });
+  // Bacaklar
+  [-0.18, 0.18].forEach(ox => {
+    const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.12,0.9,6),
+      new THREE.MeshPhongMaterial({ color: 0x2c3e50 }));
+    leg.position.set(ox, 0.35, 0); g.add(leg);
+  });
+  const excMat = new THREE.MeshPhongMaterial({ color: 0xf1c40f, emissive: 0xf1c40f, emissiveIntensity: 0.9 });
+  const excl = new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,0.5,6), excMat);
+  excl.position.y = 2.6; g.add(excl);
+  const dot = new THREE.Mesh(new THREE.SphereGeometry(0.1,6,6), excMat);
+  dot.position.y = 2.2; g.add(dot);
+  g.position.set(x, 0, z);
+  g.userData = { waiting: true, inCar: false, excl };
+  scene.add(g); npcs.push(g);
 }
 
 let npcT = 0;
@@ -573,8 +600,8 @@ function checkDropoff() {
       activePassenger.npc.userData.inCar = false;
       activePassenger.npc.userData.waiting = true;
       activePassenger.npc.visible = true;
-      const nl = LOCS[Math.floor(Math.random()*LOCS.length)];
-      activePassenger.npc.position.set(nl.x+(Math.random()-0.5)*8, 0, nl.z+(Math.random()-0.5)*8);
+      const nl = ROAD_SPAWN_POINTS[Math.floor(Math.random()*ROAD_SPAWN_POINTS.length)];
+      activePassenger.npc.position.set(nl.x, 0, nl.z);
     }, 3000);
     activePassenger = null;
     if (destMarker) { scene.remove(destMarker); destMarker = null; }
