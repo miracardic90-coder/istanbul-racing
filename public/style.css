@@ -1,0 +1,213 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #000; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
+#gameCanvas { display: block; width: 100vw; height: 100vh; }
+
+/* LOADING */
+#loading {
+  position: fixed; inset: 0;
+  background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 100%);
+  display: flex; align-items: center; justify-content: center; z-index: 1000;
+  transition: opacity 1s;
+}
+#loading.hidden { opacity: 0; pointer-events: none; }
+.loading-content { text-align: center; color: #fff; width: 340px; }
+.loading-content h1 {
+  font-size: 2.8rem; font-weight: 900; letter-spacing: 4px;
+  background: linear-gradient(90deg, #e74c3c, #f39c12);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 8px;
+}
+.loading-content p { color: #aaa; margin-bottom: 28px; }
+.loader-bar { background: #222; border-radius: 8px; height: 8px; overflow: hidden; margin-bottom: 12px; }
+#loader-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #e74c3c, #f39c12); border-radius: 8px; transition: width 0.3s; }
+#loader-text { color: #888; font-size: 0.85rem; }
+
+/* GARAGE */
+#garage {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.93);
+  display: flex; align-items: center; justify-content: center; z-index: 900;
+  backdrop-filter: blur(12px);
+}
+#garage.hidden { display: none; }
+.garage-inner { color: #fff; text-align: center; max-width: 860px; width: 92%; }
+.garage-inner h2 { font-size: 1.8rem; letter-spacing: 3px; margin-bottom: 6px; }
+.garage-inner .money { font-size: 1.3rem; color: #f1c40f; margin-bottom: 20px; }
+.car-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 22px; }
+.car-card {
+  background: #111; border: 2px solid #2a2a2a; border-radius: 12px;
+  padding: 14px; cursor: pointer; transition: all 0.2s; position: relative;
+}
+.car-card:hover { border-color: #e74c3c; transform: translateY(-2px); }
+.car-card.selected { border-color: #f1c40f; background: #1a1500; }
+.car-card.locked { opacity: 0.55; cursor: not-allowed; }
+.car-preview { height: 70px; display: flex; align-items: center; justify-content: center; font-size: 2.8rem; }
+.car-card h3 { font-size: 0.95rem; margin: 6px 0 4px; }
+.car-card .car-stats { font-size: 0.72rem; color: #aaa; }
+.car-card .car-price { font-size: 0.88rem; color: #f1c40f; margin-top: 6px; }
+.owned-badge { position: absolute; top: 7px; right: 7px; background: #27ae60; color: #fff; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; }
+.stat-bar { background: #333; border-radius: 4px; height: 5px; margin: 2px 0; }
+.stat-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #e74c3c, #f39c12); }
+#btn-start-race {
+  background: linear-gradient(90deg, #e74c3c, #c0392b); color: #fff;
+  border: none; padding: 13px 44px; font-size: 1.1rem; font-weight: 700;
+  border-radius: 8px; cursor: pointer; letter-spacing: 2px; transition: transform 0.1s;
+}
+#btn-start-race:hover { transform: scale(1.04); }
+
+/* HUD */
+#ui { position: fixed; inset: 0; pointer-events: none; z-index: 100; }
+
+#hud-top {
+  position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 12px; align-items: center;
+}
+#money-display {
+  background: rgba(0,0,0,0.75); border: 2px solid #f1c40f;
+  border-radius: 8px; padding: 7px 16px; color: #f1c40f;
+  font-size: 1.1rem; font-weight: 700; backdrop-filter: blur(8px);
+}
+#car-display {
+  background: rgba(0,0,0,0.75); border: 2px solid rgba(255,255,255,0.15);
+  border-radius: 8px; padding: 7px 16px; color: #fff; font-size: 0.88rem; backdrop-filter: blur(8px);
+}
+#garage-btn {
+  pointer-events: all; background: rgba(0,0,0,0.75);
+  border: 2px solid rgba(255,255,255,0.2); color: #fff;
+  padding: 7px 14px; border-radius: 8px; cursor: pointer;
+  font-size: 0.88rem; backdrop-filter: blur(8px); transition: border-color 0.2s;
+}
+#garage-btn:hover { border-color: #e74c3c; }
+
+/* SPEEDOMETER */
+#speedometer {
+  position: absolute; bottom: 28px; right: 28px;
+  width: 140px; height: 140px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+}
+#speedo-canvas { position: absolute; top: 0; left: 0; }
+#speed-value { font-size: 2.2rem; font-weight: 900; color: #fff; line-height: 1; position: relative; z-index: 1; margin-top: 20px; }
+#speed-label { font-size: 0.7rem; color: #aaa; letter-spacing: 2px; position: relative; z-index: 1; }
+
+/* PLAYERS */
+#players-list {
+  position: absolute; top: 70px; right: 18px;
+  background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px; padding: 10px 12px; min-width: 150px; backdrop-filter: blur(8px);
+}
+#players-title { color: #aaa; font-size: 0.68rem; letter-spacing: 2px; margin-bottom: 7px; }
+.player-entry { display: flex; align-items: center; gap: 7px; margin: 3px 0; font-size: 0.82rem; color: #fff; }
+.player-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+/* TAXI HUD */
+#taxi-hud {
+  position: absolute; top: 70px; left: 18px;
+  background: rgba(0,0,0,0.8); border: 2px solid #f1c40f;
+  border-radius: 12px; padding: 14px 18px; backdrop-filter: blur(8px);
+  min-width: 220px;
+}
+#taxi-hud.hidden { display: none; }
+#taxi-status { color: #f1c40f; font-size: 0.8rem; letter-spacing: 1px; margin-bottom: 6px; }
+#taxi-dest { color: #fff; font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+#taxi-reward { color: #2ecc71; font-size: 0.9rem; }
+
+/* NPC PROMPT */
+#npc-prompt {
+  position: absolute; bottom: 120px; left: 50%; transform: translateX(-50%);
+  background: rgba(0,0,0,0.85); border: 2px solid #f1c40f;
+  border-radius: 10px; padding: 10px 22px; color: #fff; font-size: 1rem;
+  backdrop-filter: blur(8px); animation: pulse 1s infinite alternate;
+}
+#npc-prompt.hidden { display: none; }
+@keyframes pulse { from { border-color: #f1c40f; } to { border-color: #e74c3c; } }
+
+/* EARN POPUP */
+#earn-popup {
+  position: absolute; top: 42%; left: 50%; transform: translateX(-50%);
+  color: #2ecc71; font-size: 2.2rem; font-weight: 900;
+  text-shadow: 0 0 20px #2ecc71; pointer-events: none;
+  opacity: 0; transition: opacity 0.4s; text-align: center;
+}
+#earn-popup.show { opacity: 1; }
+
+/* CONTROLS */
+#controls-hint {
+  position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 14px; color: rgba(255,255,255,0.35); font-size: 0.72rem;
+}
+
+/* DESTINATION MARKER */
+.dest-label {
+  position: absolute; background: rgba(231,76,60,0.9);
+  color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 0.8rem;
+  pointer-events: none; transform: translate(-50%, -100%);
+}
+
+/* ── MOBİL KONTROLLER ── */
+#mobile-controls {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  display: none; /* JS ile gösterilecek */
+  pointer-events: none;
+  padding: 16px;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+#mobile-controls.visible { display: flex; }
+
+/* Joystick */
+#joystick-zone { pointer-events: all; }
+#joystick-base {
+  width: 110px; height: 110px;
+  background: rgba(255,255,255,0.12);
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  position: relative;
+  touch-action: none;
+}
+#joystick-knob {
+  width: 46px; height: 46px;
+  background: rgba(255,255,255,0.55);
+  border: 2px solid rgba(255,255,255,0.8);
+  border-radius: 50%;
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  transition: none;
+  pointer-events: none;
+}
+
+/* Sağ butonlar */
+#mobile-btns {
+  display: flex; flex-direction: column; gap: 12px;
+  pointer-events: all;
+}
+.mob-btn {
+  width: 72px; height: 72px;
+  background: rgba(0,0,0,0.65);
+  border: 2px solid rgba(255,255,255,0.25);
+  border-radius: 50%;
+  color: #fff; font-size: 0.65rem; font-weight: 700;
+  cursor: pointer; touch-action: manipulation;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 2px; line-height: 1;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.1s;
+}
+.mob-btn:active { background: rgba(231,76,60,0.6); }
+.mob-btn.yellow:active { background: rgba(241,196,15,0.6); }
+.mob-btn span { font-size: 0.55rem; letter-spacing: 0.5px; }
+
+/* Mobilde HUD ayarları */
+@media (max-width: 768px) {
+  #controls-hint { display: none; }
+  #speedometer { bottom: 140px; right: 16px; width: 110px; height: 110px; }
+  #speedo-canvas { width: 110px; height: 110px; }
+  #speed-value { font-size: 1.8rem; }
+  #players-list { display: none; }
+  #hud-top { top: 10px; gap: 8px; }
+  #money-display { font-size: 0.95rem; padding: 5px 12px; }
+  #car-display { font-size: 0.75rem; padding: 5px 10px; }
+  #garage-btn { padding: 5px 10px; font-size: 0.78rem; }
+  #taxi-hud { top: 60px; left: 10px; padding: 10px 14px; min-width: 180px; }
+  #npc-prompt { bottom: 160px; font-size: 0.88rem; }
+}

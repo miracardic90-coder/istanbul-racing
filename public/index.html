@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>İstanbul GTA - Taksi</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="loading">
+  <div class="loading-content">
+    <h1>🏙️ İSTANBUL GTA</h1>
+    <p>Taksi sür, para kazan, şehri fethet</p>
+    <div class="loader-bar"><div id="loader-fill"></div></div>
+    <div id="loader-text">Şehir yükleniyor...</div>
+  </div>
+</div>
+
+<div id="garage" class="hidden">
+  <div class="garage-inner">
+    <h2>🚗 ARAÇ SEÇ</h2>
+    <div class="money" id="garage-money">💰 0 ₺</div>
+    <div class="car-grid" id="car-grid"></div>
+    <button id="btn-start-race">OYUNA GİR</button>
+  </div>
+</div>
+
+<div id="ui">
+  <div id="hud-top">
+    <div id="money-display">💰 <span id="money-val">0</span> ₺</div>
+    <div id="car-display">🚗 <span id="car-name-val">-</span></div>
+    <button id="garage-btn">🏎️ Garaj</button>
+  </div>
+
+  <div id="speedometer">
+    <canvas id="speedo-canvas" width="140" height="140"></canvas>
+    <div id="speed-value">0</div>
+    <div id="speed-label">km/h</div>
+  </div>
+
+  <div id="players-list">
+    <div id="players-title">ONLINE</div>
+    <div id="players-content"></div>
+  </div>
+
+  <div id="taxi-hud" class="hidden">
+    <div id="taxi-status"></div>
+    <div id="taxi-dest"></div>
+    <div id="taxi-reward"></div>
+  </div>
+
+  <div id="npc-prompt" class="hidden">
+    <span>🧍 Yolcu bekliyor — <b>E</b> ile al</span>
+  </div>
+
+  <div id="earn-popup"></div>
+
+  <div id="controls-hint">
+    <span>W/S Gaz/Fren</span>
+    <span>A/D Direksiyon</span>
+    <span>SPACE El freni</span>
+    <span>E Yolcu al/bırak</span>
+  </div>
+
+  <!-- MOBİL KONTROLLER -->
+  <div id="mobile-controls">
+    <div id="joystick-zone">
+      <div id="joystick-base">
+        <div id="joystick-knob"></div>
+      </div>
+    </div>
+    <div id="mobile-btns">
+      <button id="btn-brake" class="mob-btn">🛑<br><span>FREN</span></button>
+      <button id="btn-pickup" class="mob-btn yellow">🧍<br><span>AL/BIRAK</span></button>
+    </div>
+  </div>
+</div>
+
+<canvas id="gameCanvas"></canvas>
+
+<script src="/socket.io/socket.io.js"></script>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.158.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.158.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module" src="game.js"></script>
+</body>
+</html>
