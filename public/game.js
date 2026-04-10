@@ -1,5 +1,5 @@
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+// THREE global olarak yüklendi (CDN)
+// GLTFLoader THREE.GLTFLoader olarak erişilebilir
 
 // ─── ARABA KATALOĞU (gerçek GLB modeller) ───────────────────────────────────
 const CAR_CATALOG = [
@@ -87,7 +87,7 @@ scene.add(sun);
 scene.add(new THREE.HemisphereLight(0x87CEEB,0x3a7d44,0.4));
 
 // ─── GLB LOADER ──────────────────────────────────────────────────────────────
-const loader = new GLTFLoader();
+const loader = new THREE.GLTFLoader();
 const carCache = {};
 
 function loadCarGLB(carData) {
@@ -499,6 +499,14 @@ document.getElementById('btn-pickup').addEventListener('touchstart', e => {
 let playerCar=null, currentCarData=null;
 let speed=0, carAngle=0, wheelRot=0;
 
+const keys={};
+window.addEventListener('keydown',e=>{
+  keys[e.code]=true;
+  if(e.code==='KeyE'&&nearNPC) pickupPassenger();
+  if(e.code==='Space') e.preventDefault();
+});
+window.addEventListener('keyup',e=>{ keys[e.code]=false; });
+
 async function applySelectedCar(){
   if(playerCar) scene.remove(playerCar);
   currentCarData=CAR_CATALOG.find(c=>c.id===selectedCarId)||CAR_CATALOG[0];
@@ -507,14 +515,6 @@ async function applySelectedCar(){
   scene.add(playerCar);
   document.getElementById('car-name-val').textContent=currentCarData.name;
 }
-
-const keys={};
-window.addEventListener('keydown',e=>{
-  keys[e.code]=true;
-  if(e.code==='KeyE'&&nearNPC) pickupPassenger();
-  if(e.code==='Space') e.preventDefault();
-});
-window.addEventListener('keyup',e=>{ keys[e.code]=false; });
 
 function updatePhysics(delta){
   if(!playerCar||!currentCarData) return;
