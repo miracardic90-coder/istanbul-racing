@@ -444,10 +444,8 @@ function checkDropoff(){
 }
 
 // ─── MOBİL KONTROLLER ────────────────────────────────────────────────────────
-const isMobile = /Android|iPhone|iPad|iPod|Touch/i.test(navigator.userAgent) || window.innerWidth < 768;
-if (isMobile) {
-  document.getElementById('mobile-controls').classList.add('visible');
-}
+// Her zaman göster (hem mobil hem masaüstü dokunmatik için)
+document.getElementById('mobile-controls').classList.add('visible');
 
 const joystick = { active: false, x: 0, y: 0, id: null };
 const jBase  = document.getElementById('joystick-base');

@@ -145,13 +145,12 @@ body { background: #000; overflow: hidden; font-family: 'Segoe UI', sans-serif; 
 /* ── MOBİL KONTROLLER ── */
 #mobile-controls {
   position: absolute; bottom: 0; left: 0; right: 0;
-  display: none; /* JS ile gösterilecek */
+  display: flex;
   pointer-events: none;
   padding: 16px;
   align-items: flex-end;
   justify-content: space-between;
 }
-#mobile-controls.visible { display: flex; }
 
 /* Joystick */
 #joystick-zone { pointer-events: all; }
