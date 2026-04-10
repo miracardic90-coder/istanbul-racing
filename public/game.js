@@ -125,37 +125,39 @@ function initGame() {
   buildWorld();
   setLoad(55, 'NPC\'ler yerleştiriliyor...');
   spawnNPCs();
-  setLoad(75, 'Araç yükleniyor...');
+  setLoad(75, 'Araç hazırlanıyor...');
 
-  applySelectedCar().then(() => {
-    setLoad(100, 'Hazır!');
-    updateMoneyHUD();
-    setupMobileControls();
-    setupSocket();
-    setTimeout(() => {
-      document.getElementById('loading').classList.add('hidden');
-      document.getElementById('ui').classList.remove('hidden');
-      openGarage();
-    }, 600);
-    animate(0);
-  }).catch(err => {
-    console.error('Araç yüklenemedi:', err);
-    // Fallback ile devam et
-    currentCarData = CAR_CATALOG[0];
-    playerCar = buildFallbackCar(currentCarData);
-    playerCar.position.set(5,0,5);
-    scene.add(playerCar);
-    setLoad(100, 'Hazır!');
-    updateMoneyHUD();
-    setupMobileControls();
-    setupSocket();
-    setTimeout(() => {
-      document.getElementById('loading').classList.add('hidden');
-      document.getElementById('ui').classList.remove('hidden');
-      openGarage();
-    }, 600);
-    animate(0);
-  });
+  // Önce fallback ile anında başla
+  currentCarData = CAR_CATALOG.find(c=>c.id===selectedCarId)||CAR_CATALOG[0];
+  playerCar = buildFallbackCar(currentCarData);
+  playerCar.position.set(5,0,5);
+  scene.add(playerCar);
+
+  setLoad(100, 'Hazır!');
+  updateMoneyHUD();
+  setupMobileControls();
+  setupSocket();
+  setTimeout(() => {
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('ui').classList.remove('hidden');
+    openGarage();
+  }, 400);
+  animate(0);
+
+  // Arka planda GLB yükle, hazır olunca değiştir
+  if (THREE.GLTFLoader) {
+    loadCarGLB(currentCarData).then(glbCar => {
+      if (playerCar && scene) {
+        const pos = playerCar.position.clone();
+        const rot = playerCar.rotation.y;
+        scene.remove(playerCar);
+        playerCar = glbCar;
+        playerCar.position.copy(pos);
+        playerCar.rotation.y = rot;
+        scene.add(playerCar);
+      }
+    });
+  }
 }
 
 function setLoad(p, t) {
@@ -709,10 +711,24 @@ window.addEventListener('keyup', e=>{ keys[e.code]=false; });
 async function applySelectedCar() {
   if(playerCar) scene.remove(playerCar);
   currentCarData = CAR_CATALOG.find(c=>c.id===selectedCarId)||CAR_CATALOG[0];
-  playerCar = await loadCarGLB(currentCarData);
+  // Önce fallback göster
+  playerCar = buildFallbackCar(currentCarData);
   playerCar.position.set(5,0,5);
   scene.add(playerCar);
-  document.getElementById('car-name-val') && (document.getElementById('car-name-val').textContent=currentCarData.name);
+  // Arka planda GLB yükle
+  if (THREE.GLTFLoader) {
+    loadCarGLB(currentCarData).then(glbCar => {
+      if (playerCar && scene) {
+        const pos = playerCar.position.clone();
+        const rot = playerCar.rotation.y;
+        scene.remove(playerCar);
+        playerCar = glbCar;
+        playerCar.position.copy(pos);
+        playerCar.rotation.y = rot;
+        scene.add(playerCar);
+      }
+    });
+  }
 }
 
 function updatePhysics(delta) {
