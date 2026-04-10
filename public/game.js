@@ -119,7 +119,7 @@ function initGame() {
   scene.add(sun);
   scene.add(new THREE.HemisphereLight(0x87CEEB, 0x3a7d44, 0.4));
 
-  loader = new THREE.GLTFLoader();
+  loader = THREE.GLTFLoader ? new THREE.GLTFLoader() : null;
 
   setLoad(20, 'Şehir inşa ediliyor...');
   buildWorld();
@@ -128,6 +128,23 @@ function initGame() {
   setLoad(75, 'Araç yükleniyor...');
 
   applySelectedCar().then(() => {
+    setLoad(100, 'Hazır!');
+    updateMoneyHUD();
+    setupMobileControls();
+    setupSocket();
+    setTimeout(() => {
+      document.getElementById('loading').classList.add('hidden');
+      document.getElementById('ui').classList.remove('hidden');
+      openGarage();
+    }, 600);
+    animate(0);
+  }).catch(err => {
+    console.error('Araç yüklenemedi:', err);
+    // Fallback ile devam et
+    currentCarData = CAR_CATALOG[0];
+    playerCar = buildFallbackCar(currentCarData);
+    playerCar.position.set(5,0,5);
+    scene.add(playerCar);
     setLoad(100, 'Hazır!');
     updateMoneyHUD();
     setupMobileControls();
@@ -154,7 +171,19 @@ function loadCarGLB(carData) {
       c.userData.wheels = findWheels(c);
       resolve(c); return;
     }
+    // GLTFLoader yoksa direkt fallback
+    if (!THREE.GLTFLoader) {
+      resolve(buildFallbackCar(carData)); return;
+    }
+    // 5 saniye timeout - yüklenemezse fallback
+    let resolved = false;
+    const timeout = setTimeout(() => {
+      if (!resolved) { resolved = true; resolve(buildFallbackCar(carData)); }
+    }, 5000);
+
     loader.load(carData.glb, gltf => {
+      if (resolved) return;
+      resolved = true; clearTimeout(timeout);
       const model = gltf.scene;
       model.scale.setScalar(carData.scale);
       model.position.y = carData.yOff;
@@ -163,7 +192,11 @@ function loadCarGLB(carData) {
       const c = model.clone();
       c.userData.wheels = findWheels(c);
       resolve(c);
-    }, undefined, () => resolve(buildFallbackCar(carData)));
+    }, undefined, () => {
+      if (resolved) return;
+      resolved = true; clearTimeout(timeout);
+      resolve(buildFallbackCar(carData));
+    });
   });
 }
 
